@@ -1,6 +1,6 @@
 {
   "name": "@secjs/http",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "scripts": {
     "build": "tsc",
@@ -19,6 +19,10 @@
     "@secjs/utils": "^1.2.8"
   },
   "files": [
+    "src/*.d.ts",
+    "src/*.js",
+    "src/**/*.d.ts",
+    "src/**/*.js",
     "index.d.ts",
     "index.js"
   ],
