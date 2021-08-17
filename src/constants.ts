@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse } from 'http'
+import { Context } from './Contracts/HandlerContract'
 
 export default {
   PORT: 4040,
@@ -12,10 +12,12 @@ export default {
     method: 'ALL',
     params: [],
     matcher: /\//,
-    handler: (request: IncomingMessage, response: ServerResponse): any => {
-      response.writeHead(404, { 'Content-Type': 'application/json' })
-      response.write(JSON.stringify({ message: 'Not found!' }))
-      response.end()
+    handler: (ctx: Context): any => {
+      ctx.response.writeHead(404, { 'Content-Type': 'application/json' })
+
+      ctx.response.write(JSON.stringify({ message: 'Not found!' }))
+
+      ctx.response.end()
     },
   },
 }

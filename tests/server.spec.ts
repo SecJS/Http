@@ -1,7 +1,7 @@
 import supertest from 'supertest'
 
 import { Sec } from '../src/server'
-import { IncomingMessage, ServerResponse } from 'http'
+import { Context } from './../src/Contracts/HandlerContract'
 
 describe('\n Server', () => {
   it('should be able to create a Http server using SecJS', async () => {
@@ -23,15 +23,12 @@ describe('\n Server', () => {
   it('should be able to create routes with handlers', async () => {
     const server = new Sec()
 
-    server.get(
-      '/tests',
-      (request: IncomingMessage, response: ServerResponse) => {
-        response.writeHead(200, { 'Content-Type': 'application/json' })
+    server.get('/tests', (ctx: Context) => {
+      ctx.response.writeHead(200, { 'Content-Type': 'application/json' })
 
-        response.write(JSON.stringify({ data: [{ id: 1, name: 'Test 1' }] }))
-        response.end()
-      },
-    )
+      ctx.response.write(JSON.stringify({ data: [{ id: 1, name: 'Test 1' }] }))
+      ctx.response.end()
+    })
 
     server.listen()
 
@@ -49,17 +46,14 @@ describe('\n Server', () => {
   it('should be able to create routes with params', async () => {
     const server = new Sec()
 
-    server.get(
-      '/tests/:id/unitaries/:unitaries_id',
-      (request: IncomingMessage, response: ServerResponse) => {
-        response.writeHead(200, { 'Content-Type': 'application/json' })
+    server.get('/tests/:id/unitaries/:unitaries_id', (ctx: Context) => {
+      ctx.response.writeHead(200, { 'Content-Type': 'application/json' })
 
-        response.write(
-          JSON.stringify({ data: { id: 1, name: 'Unit Test 1', testId: 1 } }),
-        )
-        response.end()
-      },
-    )
+      ctx.response.write(
+        JSON.stringify({ data: { id: 1, name: 'Unit Test 1', testId: 1 } }),
+      )
+      ctx.response.end()
+    })
 
     server.listen()
 
