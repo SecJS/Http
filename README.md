@@ -34,22 +34,17 @@ yarn add @secjs/http
 > Use Sec to create the Http server and map all your routes with handlers
 
 ```ts
-import { Sec } from '@secjs/http'
+import { Sec, Context } from '@secjs/http'
 
 const server = new Sec()
 
-server.get(
-  '/users/:id/likes/:like_id',
-  (request: IncomingMessage, response: ServerResponse) => {
-    response.writeHead(200, { 'Content-Type': 'application/json' })
+server.get('/', (ctx: Context) => {
+  ctx.response.writeHead(200, { 'Content-Type': 'application/json' })
 
-    response.write(
-      JSON.stringify({ data: { id: 1, name: 'Like 1', userId: 1 } }),
-    )
+  ctx.response.write(JSON.stringify({ hello: 'world!' }))
 
-    response.end()
-  },
-)
+  ctx.response.end()
+})
 
 server.listen(4040, () => console.log('Server running!'))
 ```
