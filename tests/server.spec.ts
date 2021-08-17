@@ -1,6 +1,7 @@
-import { IncomingMessage, ServerResponse } from 'http'
 import supertest from 'supertest'
+
 import { Sec } from '../src/server'
+import { IncomingMessage, ServerResponse } from 'http'
 
 describe('\n Server', () => {
   it('should be able to create a Http server using SecJS', async () => {

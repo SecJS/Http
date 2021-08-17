@@ -560,6 +560,19 @@
     "@nodelib/fs.scandir" "2.1.4"
     fastq "^1.6.0"
 
+"@secjs/contracts@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@secjs/contracts/-/contracts-1.0.4.tgz#79d8127afd3e42454f281ad4b4a58a1d2e49b44a"
+  integrity sha512-yXzC2bCk5o+7EQUye79k8mB4fkzBsOvQYkhDAJtqjy04tR14znbp6gBqAOvU3OHkJ6DlbwWGmsVEfk98qVo+0w==
+
+"@secjs/utils@^1.2.8":
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/@secjs/utils/-/utils-1.2.8.tgz#1d140945fe60d0bca59eeeb97a5ae37214a02653"
+  integrity sha512-hrbrXxDvIBnu0pJP0qwjmOhig5JOX3Ymf8S4h+oq3lKb33pc/yRE7dztPqdxVdgJFCOvTDW2WzVIzg1vQA7m5Q==
+  dependencies:
+    "@secjs/contracts" "^1.0.4"
+    uuid "^8.3.2"
+
 "@sinonjs/commons@^1.7.0":
   version "1.8.3"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.3.tgz#3802ddd21a50a949b6721ddd72da36e67e7f1b2d"
@@ -5022,7 +5035,7 @@ util-deprecate@^1.0.1:
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
 
-uuid@^8.3.0:
+uuid@^8.3.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==

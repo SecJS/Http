@@ -1,13 +1,13 @@
 import constants from './constants'
 
-import { getParams } from './getParams'
-import { createMatcher } from './createMatcher'
-
+import { Route } from '@secjs/utils/src/Classes/Route'
 import { RouteContract } from './Contracts/RouteContract'
 import { HandlerContract } from './Contracts/HandlerContract'
 import { createServer, IncomingMessage, Server, ServerResponse } from 'http'
 
 export class Sec {
+  private routeUtils: Route
+
   private nodeServer: Server
   private routes: RouteContract[] = [constants.DEFAULT_ROUTE]
 
@@ -20,12 +20,14 @@ export class Sec {
       path,
       method: method.toUpperCase(),
       handler: secHandler,
-      params: getParams(path),
-      matcher: createMatcher(path),
+      params: this.routeUtils.getParamsName(path),
+      matcher: this.routeUtils.createMatcher(path),
     })
   }
 
   constructor() {
+    this.routeUtils = new Route()
+
     this.nodeServer = createServer(
       (request: IncomingMessage, response: ServerResponse) => {
         const { url, method } = request

@@ -1,6 +1,6 @@
 {
   "name": "@secjs/http",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "scripts": {
     "build": "tsc",
@@ -15,7 +15,9 @@
   "repository": "https://github.com/secjs/http",
   "author": "João Lenon <lenonsec7@gmail.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@secjs/utils": "^1.2.8"
+  },
   "files": [
     "index.d.ts",
     "index.js"
