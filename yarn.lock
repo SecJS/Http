@@ -565,10 +565,15 @@
   resolved "https://registry.yarnpkg.com/@secjs/contracts/-/contracts-1.0.4.tgz#79d8127afd3e42454f281ad4b4a58a1d2e49b44a"
   integrity sha512-yXzC2bCk5o+7EQUye79k8mB4fkzBsOvQYkhDAJtqjy04tR14znbp6gBqAOvU3OHkJ6DlbwWGmsVEfk98qVo+0w==
 
-"@secjs/utils@^1.2.8":
-  version "1.2.8"
-  resolved "https://registry.yarnpkg.com/@secjs/utils/-/utils-1.2.8.tgz#1d140945fe60d0bca59eeeb97a5ae37214a02653"
-  integrity sha512-hrbrXxDvIBnu0pJP0qwjmOhig5JOX3Ymf8S4h+oq3lKb33pc/yRE7dztPqdxVdgJFCOvTDW2WzVIzg1vQA7m5Q==
+"@secjs/contracts@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@secjs/contracts/-/contracts-1.0.7.tgz#d4ec704d6f5f6886635f7f1523c6ccae4ca44f8f"
+  integrity sha512-HFOKPRaPH0qJtfZXy7sci3fTzY0Akt7ySlJcp1wO4rBBy+OXgKnjpUucobRzIQfaM97WaaNr3QXcACQI/DHiVw==
+
+"@secjs/utils@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@secjs/utils/-/utils-1.3.0.tgz#29aa1f7b15c740cf4f34a5a74eb959c2238e1c53"
+  integrity sha512-axuwtU6KM9Dk5pIA+00tVAgFhru7V9BXpdpaA0v2z0igte6NeIZkT1oKAJARYtXRKsAYDYZXru4xuSb1kZE/WQ==
   dependencies:
     "@secjs/contracts" "^1.0.4"
     uuid "^8.3.2"

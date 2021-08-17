@@ -9,7 +9,7 @@ export class Sec {
   private routeUtils: Route
 
   private nodeServer: Server
-  private routes: RouteContract[] = [constants.DEFAULT_ROUTE]
+  private routes: RouteContract[] = []
 
   private createRouteHandler(
     path: string,
@@ -40,9 +40,9 @@ export class Sec {
         const chosen =
           this.routes.find(
             route => route.matcher.test(url) && route.method === method,
-          ) || this.routes[0]
+          ) || constants.DEFAULT_ROUTE
 
-        return chosen.handler(request, response)
+        return chosen.handler({ request, response })
       },
     )
   }
