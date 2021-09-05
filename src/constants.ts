@@ -1,4 +1,4 @@
-import { Context } from './Contracts/HandlerContract'
+import { SecContextContract } from '@secjs/contracts'
 
 export default {
   PORT: 4040,
@@ -12,12 +12,10 @@ export default {
     method: 'ALL',
     params: [],
     matcher: /\//,
-    handler: (ctx: Context): any => {
-      ctx.response.writeHead(404, { 'Content-Type': 'application/json' })
-
-      ctx.response.write(JSON.stringify({ message: 'Not found!' }))
-
-      ctx.response.end()
+    handler: ({ response }: SecContextContract): any => {
+      return response
+        .status(404)
+        .json(JSON.stringify({ message: 'Not found!' }))
     },
   },
 }
