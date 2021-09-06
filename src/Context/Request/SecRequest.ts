@@ -1,6 +1,5 @@
+import { SecRequestContract } from '@secjs/contracts'
 import { Route } from '@secjs/utils/src/Classes/Route'
-import { IncomingMessage } from 'http'
-import { SecRequestContract, InternalRouteContract } from '@secjs/contracts'
 
 export class SecRequest implements SecRequestContract {
   private _ip = ''
@@ -14,20 +13,17 @@ export class SecRequest implements SecRequestContract {
   private _originalUrl = ''
   private routeUtils = new Route()
 
-  constructor(
-    body: any,
-    route: InternalRouteContract,
-    request: IncomingMessage,
-  ) {
-    this._ip = request.socket.remoteAddress
-    this._body = body ? JSON.parse(body) : {}
+  constructor(request: any) {
+    this._body = request.body
     this._method = request.method
-    this._params = this.routeUtils.getParamsValue(route.path, request.url) || {}
-    this._queries = this.routeUtils.getQueryParamsValue(request.url) || {}
-    this._headers = request.headers
-    this._fullUrl = this.routeUtils.removeQueryParams(request.url)
-    this._baseUrl = route.path
     this._originalUrl = request.url
+    this._headers = request.headers
+    this._baseUrl = request.route.path
+    this._ip = request.socket.remoteAddress
+    this._fullUrl = this.routeUtils.removeQueryParams(request.url)
+    this._queries = this.routeUtils.getQueryParamsValue(request.url) || {}
+    this._params =
+      this.routeUtils.getParamsValue(request.route.path, request.url) || {}
   }
 
   payload(payload: string, defaultValue?: string): any {

@@ -23,6 +23,9 @@ export class SecResponse implements SecResponseContract {
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   json(data?: any): void {
+    this.vanillaResponse.setHeader('Accept', 'application/json')
+    this.vanillaResponse.setHeader('Content-Type', 'application/json')
+
     this.vanillaResponse.end(JSON.stringify(data))
   }
 

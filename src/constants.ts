@@ -13,9 +13,7 @@ export default {
     params: [],
     matcher: /\//,
     handler: ({ response }: SecContextContract): any => {
-      return response
-        .status(404)
-        .json(JSON.stringify({ message: 'Not found!' }))
+      return response.status(404).json({ message: 'Not found!' })
     },
   },
 }
