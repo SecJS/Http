@@ -29,21 +29,18 @@ yarn add @secjs/http
 
 ## Usage
 
-### Sec
+### SecJS
 
-> Use Sec to create the Http server and map all your routes with handlers
+> Use SecJS to create the Http server and map all your routes with handlers
 
 ```ts
-import { Sec, Context } from '@secjs/http'
+import { SecJS } from '@secjs/http'
+import { SecContextContract } from '@secjs/contracts'
 
-const server = new Sec()
+const server = new SecJS()
 
-server.get('/', (ctx: Context) => {
-  ctx.response.writeHead(200, { 'Content-Type': 'application/json' })
-
-  ctx.response.write(JSON.stringify({ hello: 'world!' }))
-
-  ctx.response.end()
+server.get('/', (ctx: SecContextContract) => {
+  ctx.response.status(200).json({ hello: 'world!' })
 })
 
 server.listen(4040, () => console.log('Server running!'))
