@@ -23,8 +23,15 @@ The intention behind this repository is to always maintain a `Http` package to a
 
 ## Installation
 
+> To use the high potential from @secjs/http you need to install first this packages from SecJS,
+> it keeps as dev dependency because one day @secjs/core will install everything once.
+
 ```bash
-yarn add @secjs/http
+npm install @secjs/contracts @secjs/utils
+```
+
+```bash
+npm install @secjs/http
 ```
 
 ## Usage
