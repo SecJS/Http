@@ -23,18 +23,7 @@ The intention behind this repository is to always maintain a `Http` package to a
 
 <img src=".github/http.png" width="200px" align="right" hspace="30px" vspace="100px">
 
-## WARN 🛑⚠️
-
-> This project is under `development` do not use it until releases v1.0.0.
-
 ## Installation
-
-> To use the high potential from @secjs/http you need to install first this packages from SecJS,
-> it keeps as dev dependency because one day @secjs/core will install everything once.
-
-```bash
-npm install @secjs/contracts @secjs/utils
-```
 
 ```bash
 npm install @secjs/http
@@ -42,21 +31,24 @@ npm install @secjs/http
 
 ## Usage
 
-### SecJS
+### Http
 
-> Use SecJS to create the Http server and map all your routes with handlers
+> Use Http class to create the http server and map all your routes
 
 ```ts
-import { SecJS } from '@secjs/http'
-import { SecContextContract } from '@secjs/contracts'
+import { Http, ContextContract } from '@secjs/http'
 
-const server = new SecJS()
+const server = new Http()
 
-server.get('/', (ctx: SecContextContract) => {
-  ctx.response.status(200).json({ hello: 'world!' })
+server.use(ctx => ctx.data.param = 'param')
+
+server.get('/', ({ response }) => {
+  response
+    .status(200)
+    .send({ hello: 'world!', param: ctx.data.param })
 })
 
-server.listen(4040, () => console.log('Server running!'))
+server.listen(1335, () => console.log('Server running!'))
 ```
 
 ---
