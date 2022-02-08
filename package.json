@@ -1,6 +1,6 @@
 {
   "name": "@secjs/http",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "license": "MIT",
   "author": "João Lenon",
@@ -19,7 +19,9 @@
     "nodejs"
   ],
   "devDependencies": {
-    "@secjs/exceptions": "^1.0.4",
+    "@secjs/exceptions": "1.0.4",
+    "@secjs/ioc": "1.0.8",
+    "@secjs/utils": "1.6.2",
     "@types/jest": "27.0.1",
     "@types/node": "14.14.37",
     "@types/supertest": "^2.0.11",
@@ -158,8 +160,6 @@
     }
   },
   "dependencies": {
-    "fastify": "^3.27.1",
-    "fastify-express": "^0.3.3",
-    "middie": "^6.0.0"
+    "fastify": "3.27.1"
   }
 }

@@ -25,6 +25,15 @@ The intention behind this repository is to always maintain a `Http` package to a
 
 ## Installation
 
+> To use the high potential from this package you need to install first this other packages from SecJS,
+> it keeps as dev dependency because one day `@secjs/core` will install everything once.
+
+```bash
+npm install @secjs/ioc @secjs/utils @secjs/exceptions
+```
+
+> Then you can install the package using:
+
 ```bash
 npm install @secjs/http
 ```
@@ -40,7 +49,8 @@ import { Http, ContextContract } from '@secjs/http'
 
 const server = new Http()
 
-server.use(ctx => ctx.data.param = 'param')
+// Middleware
+server.use((ctx: ContextContract) => ctx.data.param = 'param')
 
 server.get('/', ({ response }) => {
   response
@@ -49,6 +59,85 @@ server.get('/', ({ response }) => {
 })
 
 server.listen(1335, () => console.log('Server running!'))
+```
+
+---
+
+### Router
+
+> Use Router class to map all the groups, resources and normal routes of the application
+
+```ts
+import { TestController } from './TestController'
+import { TestMiddleware } from './TestMiddleware'
+
+import { Http, Router, ContextContract } from '@secjs/http'
+
+// With router class you can map your routes inside groups and create resources
+
+const http = new Http() // First you need to create the Http server
+const Route = new Router(http)
+
+// Create a route group to set the API version as prefix
+Route.group(() => {
+  Route.get('posts', (ctx: ContextContract) => {
+    ctx.response.status(200).send({
+      hello: 'world',
+      userId: ctx.data.userId,
+      postId: ctx.data.postId
+    })
+  })
+    .middleware((ctx: ContextContract) => {
+      ctx.data.postId = 1
+
+      ctx.next()
+    })
+
+  // You can create a Resource route to create all the Http methods (index, store, show, update and delete)
+  Route.resource('tests', new TestController()).except(['show']) // You can use except to create all minus show method
+})
+  .prefix('/api/v1')
+  // You can how many middlewares you want using builder pattern, .middleware, .middleware, .middleware ....
+  .middleware((ctx: ContextContract) => {
+    ctx.data.userId = 1
+
+    ctx.next()
+  })
+
+// You can also use middlewares 
+
+// You need to call register method in the end to register all the routes in the Http server
+Route.register()
+http.listen()
+```
+
+> Registering routes like this could be a little difficult, so you can use the global Container from @secjs/ioc to register 
+> controllers and middlewares in the container
+
+```ts
+import '@secjs/ioc/src/utils/global' // Will load the class Container in global runtime and in TS types
+
+Container.singleton(TestController, 'TestController')
+Container.singleton(
+  // Named middlewares
+  { 
+    // Is extremelly important that middleware implement MiddlewareContract from @secjs/http
+    'test.auth': new TestMiddleware(), 
+    'test.hello': new TestMiddleware() 
+  },
+  'Middlewares',
+)
+
+// Now you can start using string names in routes
+
+Route.group(() => {
+  Route.resource('posts', 'TestController').only(['index', 'store']).middleware('test.auth')
+})
+  .prefix('/api/v2')
+  .middleware('test.hello')
+
+Route.register()
+http.listen()
 ```
 
 ---

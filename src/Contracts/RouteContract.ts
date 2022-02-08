@@ -7,10 +7,11 @@
  * file that was distributed with this source code.
  */
 
+import { HttpMethodTypes } from './HttpMethodTypes'
 import { FastifyHandlerContract } from './FastifyHandlerContract'
 
 export interface RouteContract {
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
+  method: HttpMethodTypes
   url: string
   handler: FastifyHandlerContract
   preHandler?: FastifyHandlerContract[]

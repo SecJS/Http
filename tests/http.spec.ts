@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import supertest from 'supertest'
 
 import { Http } from '../src/Http'

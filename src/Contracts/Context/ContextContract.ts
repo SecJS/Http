@@ -14,6 +14,8 @@ import { ResponseContract } from './ResponseContract'
 export interface ContextContract {
   request: RequestContract
   response: ResponseContract
+  params: Record<string, string>
+  queries: Record<string, string>
   next?: NextContract
   data?: Record<string, any>
 }

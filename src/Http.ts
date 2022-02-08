@@ -14,9 +14,11 @@ import fastify, {
   PrintRoutesOptions,
 } from 'fastify'
 
+import { String } from '@secjs/utils'
 import { Request } from './Context/Request'
 import { Response } from './Context/Response'
 import { RouteContract } from './Contracts/RouteContract'
+import { HttpMethodTypes } from './Contracts/HttpMethodTypes'
 import { HandlerContract } from './Contracts/Context/HandlerContract'
 import { FastifyHandlerContract } from './Contracts/FastifyHandlerContract'
 
@@ -29,7 +31,7 @@ declare module 'fastify' {
 export class Http {
   private readonly routes: RouteContract[]
   private readonly server: FastifyInstance
-  private readonly middlewares: FastifyHandlerContract[]
+  private readonly middlewares: HandlerContract[]
 
   constructor() {
     this.routes = []
@@ -48,10 +50,7 @@ export class Http {
     const statusCode = error.statusCode || error.status || 500
 
     const body = {
-      code: code
-        .replace(/([A-Z])/g, '_$1')
-        .toUpperCase()
-        .replace('_', ''),
+      code: String.toSnakeCase(code).toUpperCase(),
       path: request.url,
       method: request.method,
       status: statusCode <= 399 ? 'SUCCESS' : 'ERROR',
@@ -66,14 +65,27 @@ export class Http {
     reply.status(statusCode).send(body)
   }
 
-  private createFastifyHandler(handler: (ctx) => Promise<void> | void) {
+  private createFastifyHandler(
+    handler: (ctx) => Promise<void> | void,
+  ): FastifyHandlerContract {
     return async (req: FastifyRequest, res: FastifyReply, next?: any) => {
       const request = new Request(req)
       const response = new Response(res)
 
       if (!req.data) req.data = {}
+      if (!req.query) req.query = {}
+      if (!req.params) req.params = {}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      if (!next) next = () => {}
 
-      return handler({ request, response, next, data: req.data })
+      return handler({
+        request,
+        response,
+        params: req.params,
+        queries: req.query,
+        data: req.data,
+        next,
+      })
     }
   }
 
@@ -82,7 +94,7 @@ export class Http {
   }
 
   use(handler: HandlerContract) {
-    this.middlewares.push(this.createFastifyHandler(handler))
+    this.middlewares.push(handler)
   }
 
   getRoutes(options?: PrintRoutesOptions) {
@@ -102,66 +114,69 @@ export class Http {
     return this.server.close(cb)
   }
 
-  get(url: string, handler: HandlerContract) {
-    this.routes.push({
-      url,
-      method: 'GET',
-      preHandler: this.middlewares,
-      handler: this.createFastifyHandler(handler),
+  route(
+    url: string,
+    methods: HttpMethodTypes[],
+    handler: HandlerContract,
+    middlewares?: HandlerContract[],
+  ) {
+    let allMiddlewares = this.middlewares
+
+    if (middlewares && middlewares.length) {
+      allMiddlewares = allMiddlewares.concat(middlewares)
+    }
+
+    const preHandlers: FastifyHandlerContract[] = allMiddlewares.map(mid =>
+      this.createFastifyHandler(mid),
+    )
+
+    methods.forEach(method => {
+      this.routes.push({
+        url,
+        method,
+        preHandler: preHandlers,
+        handler: this.createFastifyHandler(handler),
+      })
     })
   }
 
-  head(url: string, handler: HandlerContract) {
-    this.routes.push({
-      url,
-      method: 'HEAD',
-      preHandler: this.middlewares,
-      handler: this.createFastifyHandler(handler),
-    })
+  get(url: string, handler: HandlerContract, middlewares?: HandlerContract[]) {
+    this.route(url, ['GET'], handler, middlewares)
   }
 
-  post(url: string, handler: HandlerContract) {
-    this.routes.push({
-      url,
-      method: 'POST',
-      preHandler: this.middlewares,
-      handler: this.createFastifyHandler(handler),
-    })
+  head(url: string, handler: HandlerContract, middlewares?: HandlerContract[]) {
+    this.route(url, ['HEAD'], handler, middlewares)
   }
 
-  put(url: string, handler: HandlerContract) {
-    this.routes.push({
-      url,
-      method: 'PUT',
-      preHandler: this.middlewares,
-      handler: this.createFastifyHandler(handler),
-    })
+  post(url: string, handler: HandlerContract, middlewares?: HandlerContract[]) {
+    this.route(url, ['POST'], handler, middlewares)
   }
 
-  patch(url: string, handler: HandlerContract) {
-    this.routes.push({
-      url,
-      method: 'PATCH',
-      preHandler: this.middlewares,
-      handler: this.createFastifyHandler(handler),
-    })
+  put(url: string, handler: HandlerContract, middlewares?: HandlerContract[]) {
+    this.route(url, ['PUT'], handler, middlewares)
   }
 
-  delete(url: string, handler: HandlerContract) {
-    this.routes.push({
-      url,
-      method: 'DELETE',
-      preHandler: this.middlewares,
-      handler: this.createFastifyHandler(handler),
-    })
+  patch(
+    url: string,
+    handler: HandlerContract,
+    middlewares?: HandlerContract[],
+  ) {
+    this.route(url, ['PATCH'], handler, middlewares)
   }
 
-  options(url: string, handler: HandlerContract) {
-    this.routes.push({
-      url,
-      method: 'OPTIONS',
-      preHandler: this.middlewares,
-      handler: this.createFastifyHandler(handler),
-    })
+  delete(
+    url: string,
+    handler: HandlerContract,
+    middlewares?: HandlerContract[],
+  ) {
+    this.route(url, ['DELETE'], handler, middlewares)
+  }
+
+  options(
+    url: string,
+    handler: HandlerContract,
+    middlewares?: HandlerContract[],
+  ) {
+    this.route(url, ['OPTIONS'], handler, middlewares)
   }
 }
