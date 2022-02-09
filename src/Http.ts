@@ -91,7 +91,23 @@ export class Http {
   }
 
   use(handler: HandlerContract) {
-    this.server.addHook('preHandler', this.createFastifyHandler(handler))
+    this.server.addHook('preHandler', (req, res, done) => {
+      const request = new Request(req)
+      const response = new Response(res)
+
+      if (!req.data) req.data = {}
+      if (!req.query) req.query = {}
+      if (!req.params) req.params = {}
+
+      return handler({
+        request,
+        response,
+        params: req.params as Record<string, string>,
+        queries: req.query as Record<string, string>,
+        data: req.data,
+        next: done,
+      })
+    })
   }
 
   listen(
