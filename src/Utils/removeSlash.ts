@@ -7,10 +7,18 @@
  * file that was distributed with this source code.
  */
 
-export function removeSlash(url: string): string {
+import { Is } from '@secjs/utils'
+
+export function removeSlash(url: string | string[]): string | string[] {
   if (url === '/') {
     return url
   }
 
-  return `/${url.replace(/^\//, '').replace(/\/$/, '')}`
+  const matcher = url => `/${url.replace(/^\//, '').replace(/\/$/, '')}`
+
+  if (Is.Array(url)) {
+    return url.map(u => matcher(u))
+  }
+
+  return matcher(url)
 }
