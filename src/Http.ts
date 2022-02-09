@@ -7,79 +7,25 @@
  * file that was distributed with this source code.
  */
 
-import fastify, {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-  PrintRoutesOptions,
-} from 'fastify'
+import fastify, { FastifyInstance, PrintRoutesOptions } from 'fastify'
 
-import { String } from '@secjs/utils'
-import { Request } from './Context/Request'
-import { Response } from './Context/Response'
+import { FastifyHandler } from './Utils/FastifyHandler'
 import { HttpMethodTypes } from './Contracts/HttpMethodTypes'
+import { defaultErrorHandler } from './Utils/defaultErrorHandler'
 import { HandlerContract } from './Contracts/Context/HandlerContract'
-import { FastifyHandlerContract } from './Contracts/FastifyHandlerContract'
-
-declare module 'fastify' {
-  interface FastifyRequest {
-    data: Record<string, any>
-  }
-}
 
 export class Http {
   private readonly server: FastifyInstance
 
   constructor() {
     this.server = fastify()
-    this.server.setErrorHandler(Http.defaultErrorHandler)
+    this.setErrorHandler(defaultErrorHandler)
   }
 
-  private static defaultErrorHandler(
-    error: any,
-    request: FastifyRequest,
-    reply: FastifyReply,
-  ) {
-    const code = error.code || error.name
-    const statusCode = error.statusCode || error.status || 500
+  setErrorHandler(handler: HandlerContract) {
+    const fastifyErrorHandler = FastifyHandler.createErrorHandler(handler)
 
-    const body = {
-      code: String.toSnakeCase(code).toUpperCase(),
-      path: request.url,
-      method: request.method,
-      status: statusCode <= 399 ? 'SUCCESS' : 'ERROR',
-      statusCode: statusCode,
-      error: {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      },
-    }
-
-    reply.status(statusCode).send(body)
-  }
-
-  private createFastifyHandler(
-    handler: (ctx) => Promise<void> | void,
-  ): FastifyHandlerContract {
-    return async (req: FastifyRequest, res: FastifyReply) => {
-      const request = new Request(req)
-      const response = new Response(res)
-
-      if (!req.data) req.data = {}
-      if (!req.query) req.query = {}
-      if (!req.params) req.params = {}
-
-      return handler({
-        request,
-        response,
-        params: req.params,
-        queries: req.query,
-        data: req.data,
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        next: () => {},
-      })
-    }
+    this.server.setErrorHandler(fastifyErrorHandler)
   }
 
   getServer(): FastifyInstance {
@@ -91,23 +37,7 @@ export class Http {
   }
 
   use(handler: HandlerContract) {
-    this.server.addHook('preHandler', (req, res, done) => {
-      const request = new Request(req)
-      const response = new Response(res)
-
-      if (!req.data) req.data = {}
-      if (!req.query) req.query = {}
-      if (!req.params) req.params = {}
-
-      return handler({
-        request,
-        response,
-        params: req.params as Record<string, string>,
-        queries: req.query as Record<string, string>,
-        data: req.data,
-        next: done,
-      })
-    })
+    this.server.addHook('preHandler', FastifyHandler.createPreHandler(handler))
   }
 
   listen(
@@ -130,9 +60,10 @@ export class Http {
     this.server.route({
       url,
       method: methods,
-      handler: this.createFastifyHandler(handler),
+      handler: FastifyHandler.createRequestHandler(handler),
       preHandler:
-        middlewares && middlewares.map(mid => this.createFastifyHandler(mid)),
+        middlewares &&
+        middlewares.map(mid => FastifyHandler.createPreHandler(mid)),
     })
   }
 

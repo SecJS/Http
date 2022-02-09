@@ -87,7 +87,7 @@ describe('\n Http Class', () => {
 
     expect(response.status).toBe(400)
     expect(response.body.code).toStrictEqual('BAD_REQUEST_EXCEPTION')
-    expect(response.body.path).toStrictEqual('/test?throwError=true')
+    expect(response.body.path).toStrictEqual('/test')
     expect(response.body.method).toStrictEqual('GET')
     expect(response.body.status).toStrictEqual('ERROR')
     expect(response.body.statusCode).toStrictEqual(400)

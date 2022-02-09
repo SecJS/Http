@@ -30,11 +30,7 @@ export class Request implements RequestContract {
   }
 
   get baseUrl(): string {
-    return this.request.url
-  }
-
-  get originalUrl(): string {
-    return this.request.url
+    return this.request.url.split('?')[0]
   }
 
   get body(): Record<string, any> {

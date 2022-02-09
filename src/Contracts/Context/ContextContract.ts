@@ -18,4 +18,5 @@ export interface ContextContract {
   queries: Record<string, string>
   next?: NextContract
   data?: Record<string, any>
+  error?: any
 }

@@ -12,7 +12,6 @@ export interface RequestContract {
   method: string
   fullUrl: string
   baseUrl: string
-  originalUrl: string
   body: Record<string, any>
   params: Record<string, string>
   queries: Record<string, string>
