@@ -17,7 +17,6 @@ import fastify, {
 import { String } from '@secjs/utils'
 import { Request } from './Context/Request'
 import { Response } from './Context/Response'
-import { RouteContract } from './Contracts/RouteContract'
 import { HttpMethodTypes } from './Contracts/HttpMethodTypes'
 import { HandlerContract } from './Contracts/Context/HandlerContract'
 import { FastifyHandlerContract } from './Contracts/FastifyHandlerContract'
@@ -29,14 +28,9 @@ declare module 'fastify' {
 }
 
 export class Http {
-  private readonly routes: RouteContract[]
   private readonly server: FastifyInstance
-  private readonly middlewares: HandlerContract[]
 
   constructor() {
-    this.routes = []
-    this.middlewares = []
-
     this.server = fastify()
     this.server.setErrorHandler(Http.defaultErrorHandler)
   }
@@ -68,15 +62,13 @@ export class Http {
   private createFastifyHandler(
     handler: (ctx) => Promise<void> | void,
   ): FastifyHandlerContract {
-    return async (req: FastifyRequest, res: FastifyReply, next?: any) => {
+    return async (req: FastifyRequest, res: FastifyReply) => {
       const request = new Request(req)
       const response = new Response(res)
 
       if (!req.data) req.data = {}
       if (!req.query) req.query = {}
       if (!req.params) req.params = {}
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      if (!next) next = () => {}
 
       return handler({
         request,
@@ -84,7 +76,8 @@ export class Http {
         params: req.params,
         queries: req.query,
         data: req.data,
-        next,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        next: () => {},
       })
     }
   }
@@ -93,24 +86,22 @@ export class Http {
     return this.server
   }
 
-  use(handler: HandlerContract) {
-    this.middlewares.push(handler)
-  }
-
   getRoutes(options?: PrintRoutesOptions) {
     return this.server.printRoutes(options)
   }
 
-  async listen(
+  use(handler: HandlerContract) {
+    this.server.addHook('preHandler', this.createFastifyHandler(handler))
+  }
+
+  listen(
     port?: number,
     cb?: (err: Error | null, address: string) => void,
-  ): Promise<void> {
-    this.routes.forEach(route => this.server.route(route))
-
+  ): void | string {
     return this.server.listen(port || 1335, cb)
   }
 
-  async close(cb?: () => void): Promise<void> {
+  close(cb?: () => void): void {
     return this.server.close(cb)
   }
 
@@ -120,23 +111,12 @@ export class Http {
     handler: HandlerContract,
     middlewares?: HandlerContract[],
   ) {
-    let allMiddlewares = this.middlewares
-
-    if (middlewares && middlewares.length) {
-      allMiddlewares = allMiddlewares.concat(middlewares)
-    }
-
-    const preHandlers: FastifyHandlerContract[] = allMiddlewares.map(mid =>
-      this.createFastifyHandler(mid),
-    )
-
-    methods.forEach(method => {
-      this.routes.push({
-        url,
-        method,
-        preHandler: preHandlers,
-        handler: this.createFastifyHandler(handler),
-      })
+    this.server.route({
+      url,
+      method: methods,
+      handler: this.createFastifyHandler(handler),
+      preHandler:
+        middlewares && middlewares.map(mid => this.createFastifyHandler(mid)),
     })
   }
 

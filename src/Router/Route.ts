@@ -49,7 +49,7 @@ export class Route {
   }
 
   private getUrl(): string {
-    const url = removeSlash(this.url)
+    const url = removeSlash(this.url) as string
 
     const prefix = this.prefixes
       .slice()
