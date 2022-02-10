@@ -14,6 +14,7 @@ import { MiddlewareTypes } from '../Contracts/MiddlewareTypes'
 import { HandlerContract } from '../Contracts/Context/HandlerContract'
 import { InterceptHandlerContract } from '../Contracts/Context/Middlewares/Intercept/InterceptHandlerContract'
 import { TerminateHandlerContract } from '../Contracts/Context/Middlewares/Terminate/TerminateHandlerContract'
+import { MiddlewareContract } from '../Contracts/MiddlewareContract'
 
 export class RouteGroup {
   routes: (Route | RouteResource | RouteGroup)[]
@@ -62,6 +63,7 @@ export class RouteGroup {
   middleware(
     middleware:
       | HandlerContract
+      | MiddlewareContract
       | InterceptHandlerContract
       | TerminateHandlerContract
       | string,

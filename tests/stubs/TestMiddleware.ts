@@ -28,7 +28,8 @@ export class TestMiddleware implements MiddlewareContract {
   }
 
   async terminate(ctx: TerminateContextContract) {
-    // TODO Test
+    console.log('Terminate middleware executed!')
+
     ctx.next()
   }
 }

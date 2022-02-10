@@ -14,6 +14,7 @@ import { HttpMethodTypes } from '../Contracts/HttpMethodTypes'
 import { HandlerContract } from '../Contracts/Context/HandlerContract'
 import { InterceptHandlerContract } from '../Contracts/Context/Middlewares/Intercept/InterceptHandlerContract'
 import { TerminateHandlerContract } from '../Contracts/Context/Middlewares/Terminate/TerminateHandlerContract'
+import { MiddlewareContract } from '../Contracts/MiddlewareContract'
 
 export class RouteResource {
   private resource: string
@@ -83,6 +84,7 @@ export class RouteResource {
   middleware(
     middleware:
       | HandlerContract
+      | MiddlewareContract
       | InterceptHandlerContract
       | TerminateHandlerContract
       | string,

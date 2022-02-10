@@ -8,11 +8,13 @@
  */
 
 import { MiddlewareContract } from '../../src/Contracts/MiddlewareContract'
-import { ContextContract } from '../../src/Contracts/Context/ContextContract'
+import { HandleContextContract } from '../../src/Contracts/Context/Middlewares/Handle/HandleContextContract'
 
 export class HandleMiddleware implements MiddlewareContract {
-  async handle(ctx: ContextContract) {
-    ctx.data.middleware = 'handle'
+  async handle(ctx: HandleContextContract) {
+    if (!ctx.data.middlewares) ctx.data.middlewares = []
+
+    ctx.data.middlewares.push('handle')
 
     ctx.next()
   }

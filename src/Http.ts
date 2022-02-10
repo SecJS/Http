@@ -46,7 +46,7 @@ export class Http {
       | HandleHandlerContract
       | InterceptHandlerContract
       | TerminateHandlerContract,
-    type: 'handler' | 'intercept' | 'terminate' = 'handler',
+    type: 'handle' | 'intercept' | 'terminate' = 'handle',
   ) {
     let hookName: any = 'preHandler'
     let handlerType = 'createDoneHandler'

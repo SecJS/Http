@@ -12,7 +12,9 @@ import { InterceptContextContract } from '../../src/Contracts/Context/Middleware
 
 export class InterceptMiddleware implements MiddlewareContract {
   async intercept(ctx: InterceptContextContract) {
-    ctx.body.middleware = 'intercepted'
+    if (!ctx.body.middlewares) ctx.body.middlewares = []
+
+    ctx.body.middlewares.push('intercept')
 
     ctx.next()
   }

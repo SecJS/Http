@@ -18,6 +18,8 @@ import { HandlerContract } from '../Contracts/Context/HandlerContract'
 import { MiddlewareTypesContract } from '../Contracts/MiddlewareTypesContract'
 import { InterceptHandlerContract } from '../Contracts/Context/Middlewares/Intercept/InterceptHandlerContract'
 import { TerminateHandlerContract } from '../Contracts/Context/Middlewares/Terminate/TerminateHandlerContract'
+import { MiddlewareContract } from '../Contracts/MiddlewareContract'
+import { isMiddlewareContract } from '../Utils/isMiddlewareContract'
 
 export class Route {
   private readonly url: string
@@ -88,6 +90,7 @@ export class Route {
   middleware(
     middleware:
       | HandlerContract
+      | MiddlewareContract
       | InterceptHandlerContract
       | TerminateHandlerContract
       | string,
@@ -111,12 +114,22 @@ export class Route {
         )
       }
 
-      if (mid['handle'])
-        this.routeMiddlewares.handlers[insertionType](mid['handle'])
-      if (mid['intercept'])
-        this.routeMiddlewares.interceptors[insertionType](mid['intercept'])
-      if (mid['terminate'])
-        this.routeMiddlewares.terminators[insertionType](mid['terminate'])
+      if (mid.handle) this.routeMiddlewares.handlers[insertionType](mid.handle)
+      if (mid.intercept)
+        this.routeMiddlewares.interceptors[insertionType](mid.intercept)
+      if (mid.terminate)
+        this.routeMiddlewares.terminators[insertionType](mid.terminate)
+
+      return this
+    }
+
+    if (isMiddlewareContract(middleware)) {
+      if (middleware.handle)
+        this.routeMiddlewares.handlers[insertionType](middleware.handle)
+      if (middleware.intercept)
+        this.routeMiddlewares.interceptors[insertionType](middleware.intercept)
+      if (middleware.terminate)
+        this.routeMiddlewares.terminators[insertionType](middleware.terminate)
 
       return this
     }
