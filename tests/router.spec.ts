@@ -241,9 +241,9 @@ describe('\n Route Class', () => {
 
     router.register()
 
-    await http.listen(3044)
+    await http.listen(3045)
 
-    const response = await supertest('http://localhost:3044').get('/test')
+    const response = await supertest('http://localhost:3045').get('/test')
 
     expect(response.status).toBe(200)
     expect(response.body).toStrictEqual({
@@ -266,9 +266,9 @@ describe('\n Route Class', () => {
 
     router.register()
 
-    await http.listen(3045)
+    await http.listen(3046)
 
-    const response = await supertest('http://localhost:3045').get('/test')
+    const response = await supertest('http://localhost:3046').get('/test')
 
     expect(response.status).toBe(200)
     expect(terminated).toBe(true)
@@ -293,9 +293,9 @@ describe('\n Route Class', () => {
 
     router.register()
 
-    await http.listen(3046)
+    await http.listen(3047)
 
-    const response = await supertest('http://localhost:3046').get('/test')
+    const response = await supertest('http://localhost:3047').get('/test')
 
     expect(response.status).toBe(200)
     expect(terminated).toBe(true)
