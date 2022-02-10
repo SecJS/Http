@@ -8,10 +8,12 @@
  */
 
 import { Route } from './Route'
-import { Is } from '@secjs/utils'
 import { RouteResource } from './RouteResource'
 import { InternalServerException } from '@secjs/exceptions'
+import { MiddlewareTypes } from '../Contracts/MiddlewareTypes'
 import { HandlerContract } from '../Contracts/Context/HandlerContract'
+import { InterceptHandlerContract } from '../Contracts/Context/Middlewares/Intercept/InterceptHandlerContract'
+import { TerminateHandlerContract } from '../Contracts/Context/Middlewares/Terminate/TerminateHandlerContract'
 
 export class RouteGroup {
   routes: (Route | RouteResource | RouteGroup)[]
@@ -57,18 +59,17 @@ export class RouteGroup {
     return this
   }
 
-  middleware(middleware: HandlerContract | string, prepend = false): this {
-    let mid: HandlerContract = null
-
-    if (Is.String(middleware)) {
-      const middlewares = Container.get('Middlewares') as Record<string, any>
-      mid = middlewares[middleware]['handle']
-    } else {
-      mid = middleware
-    }
-
+  middleware(
+    middleware:
+      | HandlerContract
+      | InterceptHandlerContract
+      | TerminateHandlerContract
+      | string,
+    type: MiddlewareTypes = 'handle',
+    prepend = false,
+  ): this {
     this.routes.forEach(route => {
-      this.invoke(route, 'middleware', [mid, prepend])
+      this.invoke(route, 'middleware', [middleware, type, prepend])
     })
 
     return this

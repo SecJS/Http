@@ -7,8 +7,12 @@
  * file that was distributed with this source code.
  */
 
-import { ContextContract } from './Context/ContextContract'
+import { HandleContextContract } from './Context/Middlewares/Handle/HandleContextContract'
+import { InterceptContextContract } from './Context/Middlewares/Intercept/InterceptContextContract'
+import { TerminateContextContract } from './Context/Middlewares/Terminate/TerminateContextContract'
 
 export interface MiddlewareContract {
-  handle(ctx: ContextContract): void | Promise<void>
+  handle?: (ctx: HandleContextContract) => void | Promise<void>
+  intercept?: (ctx: InterceptContextContract) => void | Promise<void>
+  terminate?: (ctx: TerminateContextContract) => void | Promise<void>
 }

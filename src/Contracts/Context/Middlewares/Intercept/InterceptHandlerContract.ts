@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
-export interface NextContract {
-  (...params: any[]): void
+import { InterceptContextContract } from './InterceptContextContract'
+
+export interface InterceptHandlerContract {
+  (ctx?: InterceptContextContract): Promise<any> | any
 }

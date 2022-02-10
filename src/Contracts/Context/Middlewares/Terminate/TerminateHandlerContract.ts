@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
-export interface NextContract {
-  (...params: any[]): void
+import { TerminateContextContract } from './TerminateContextContract'
+
+export interface TerminateHandlerContract {
+  (ctx?: TerminateContextContract): Promise<any> | any
 }

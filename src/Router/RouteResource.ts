@@ -9,8 +9,11 @@
 
 import { Route } from './Route'
 import { String } from '@secjs/utils'
+import { MiddlewareTypes } from '../Contracts/MiddlewareTypes'
 import { HttpMethodTypes } from '../Contracts/HttpMethodTypes'
 import { HandlerContract } from '../Contracts/Context/HandlerContract'
+import { InterceptHandlerContract } from '../Contracts/Context/Middlewares/Intercept/InterceptHandlerContract'
+import { TerminateHandlerContract } from '../Contracts/Context/Middlewares/Terminate/TerminateHandlerContract'
 
 export class RouteResource {
   private resource: string
@@ -77,8 +80,15 @@ export class RouteResource {
     })
   }
 
-  middleware(middleware: HandlerContract | string): this {
-    this.routes.forEach(route => route.middleware(middleware))
+  middleware(
+    middleware:
+      | HandlerContract
+      | InterceptHandlerContract
+      | TerminateHandlerContract
+      | string,
+    type: MiddlewareTypes = 'handle',
+  ): this {
+    this.routes.forEach(route => route.middleware(middleware, type))
 
     return this
   }

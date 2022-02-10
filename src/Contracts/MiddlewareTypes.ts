@@ -7,6 +7,4 @@
  * file that was distributed with this source code.
  */
 
-export interface NextContract {
-  (...params: any[]): void
-}
+export type MiddlewareTypes = 'handle' | 'terminate' | 'intercept'

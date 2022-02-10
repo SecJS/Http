@@ -18,6 +18,8 @@ import { Router } from '../src/Router/Router'
 import { BadRequestException } from '@secjs/exceptions'
 import { TestController } from './stubs/TestController'
 import { TestMiddleware } from './stubs/TestMiddleware'
+import { InterceptMiddleware } from './stubs/InterceptMiddleware'
+import { TerminateMiddleware } from './stubs/TerminateMiddleware'
 
 describe('\n Route Class', () => {
   let http: Http
@@ -138,17 +140,15 @@ describe('\n Route Class', () => {
 
     await http.listen(3043)
 
-    {
-      const response = await supertest('http://localhost:3043').get('/test')
+    const response = await supertest('http://localhost:3043').get('/test')
 
-      expect(response.status).toBe(200)
-      expect(response.body).toStrictEqual({
-        hello: 'world',
-        param: 'param',
-        midHandler: true,
-        test: 'middleware',
-      })
-    }
+    expect(response.status).toBe(200)
+    expect(response.body).toStrictEqual({
+      hello: 'world',
+      param: 'param',
+      midHandler: true,
+      test: 'middleware',
+    })
   })
 
   it('should be able to register a new group with resource inside', async () => {
@@ -223,7 +223,9 @@ describe('\n Route Class', () => {
       })
     }
     {
-      const response = await supertest('http://localhost:3044').post('/v1/tests')
+      const response = await supertest('http://localhost:3044').post(
+        '/v1/tests',
+      )
 
       expect(response.status).toBe(200)
       expect(response.body).toStrictEqual({
@@ -234,5 +236,65 @@ describe('\n Route Class', () => {
         test: 'middleware',
       })
     }
+  })
+
+  it('should be able to register a new route with intercept middleware', async () => {
+    Container.singleton(TestController, 'TestController')
+    Container.singleton(
+      {
+        'test.middleware': new TestMiddleware(),
+        'test.intercept': new InterceptMiddleware(),
+      },
+      'Middlewares',
+    )
+
+    router
+      .get('test', 'TestController.index')
+      .middleware('test.intercept')
+      .middleware('test.middleware')
+
+    router.register()
+
+    await http.listen(3044)
+
+    const response = await supertest('http://localhost:3044').get('/test')
+
+    expect(response.status).toBe(200)
+    expect(response.body).toStrictEqual({
+      hello: 'world',
+      param: 'param',
+      test: 'middleware',
+      middleware: 'intercepted',
+    })
+  })
+
+  it('should be able to register a new route with terminate middleware', async () => {
+    Container.singleton(TestController, 'TestController')
+    Container.singleton(
+      {
+        'test.middleware': new TestMiddleware(),
+        'test.terminate': new TerminateMiddleware(),
+      },
+      'Middlewares',
+    )
+
+    router
+      .get('test', 'TestController.index')
+      .middleware('test.terminate')
+      .middleware('test.middleware')
+
+    router.register()
+
+    await http.listen(3045)
+
+    const response = await supertest('http://localhost:3045').get('/test')
+
+    expect(response.status).toBe(200)
+    expect(response.body).toStrictEqual({
+      hello: 'world',
+      param: 'param',
+      test: 'middleware',
+      middleware: 'intercepted',
+    })
   })
 })
