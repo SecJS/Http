@@ -47,7 +47,11 @@ export class Router {
     methods: HttpMethodTypes[],
     handler: HandlerContract | string,
   ): Route {
-    if (this.controllerInstance && Is.String(handler)) {
+    if (
+      this.controllerInstance &&
+      Is.String(handler) &&
+      !handler.includes('.')
+    ) {
       handler = this.controllerInstance[handler]
     }
 

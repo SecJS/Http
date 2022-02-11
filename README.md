@@ -194,10 +194,17 @@ Container.singleton(
 // If you use named middlewares in Router, he will register all the three methods of Middleware class.
 Route.get('middlewares', 'TestController.index').middleware('middleware')
 
-// 
+// But you can instantiate the middleware and will register all the three methods
 Route
-  .get('middlewares', 'TestController.index')
-  .middleware(new Middleware().handle)
+  // You can use controller method to set the default controller of Router
+  .controller(new TestController())
+  .get('middlewares', 'index')
+  .middleware(new Middleware())
+
+// Or you can set only the method and as second parameter the middleware type
+Route
+  .get('middlewares', new TestController().index)
+  .middleware(new Middleware().intercept, 'intercept')
 ```
 
 ---
