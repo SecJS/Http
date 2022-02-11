@@ -7,7 +7,10 @@
  * file that was distributed with this source code.
  */
 
+import { Env } from '@secjs/env'
+import { Is } from '@secjs/utils'
 import { FastifyRequest } from 'fastify'
+import { removeSlash } from '../Utils/removeSlash'
 import { RequestContract } from '../Contracts/Context/RequestContract'
 
 export class Request implements RequestContract {
@@ -25,12 +28,22 @@ export class Request implements RequestContract {
     return this.request.method
   }
 
-  get fullUrl(): string {
-    return this.request.url
+  get hostUrl(): string {
+    const url = this.request.url
+    const port = Env('PORT', '1335')
+    let host = Env('APP_DOMAIN', `http://localhost:${port}`)
+
+    if (!Is.Ip(host)) host = host.replace(`:${port}`, '')
+
+    return removeSlash(`${host}${url}`) as string
   }
 
   get baseUrl(): string {
     return this.request.url.split('?')[0]
+  }
+
+  get originalUrl(): string {
+    return this.request.url
   }
 
   get body(): Record<string, any> {

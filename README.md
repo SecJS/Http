@@ -29,7 +29,7 @@ The intention behind this repository is to always maintain a `Http` package to a
 > it keeps as dev dependency because one day `@secjs/core` will install everything once.
 
 ```bash
-npm install @secjs/ioc @secjs/utils @secjs/exceptions
+npm install @secjs/ioc @secjs/env @secjs/utils @secjs/exceptions
 ```
 
 > Then you can install the package using:
