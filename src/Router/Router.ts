@@ -9,6 +9,7 @@
 
 import { Http } from '../Http'
 import { Route } from './Route'
+import { Is } from '@secjs/utils'
 import { RouteGroup } from './RouteGroup'
 import { RouteResource } from './RouteResource'
 import { HttpMethodTypes } from '../Contracts/HttpMethodTypes'
@@ -23,6 +24,7 @@ export class Router {
   }
 
   private readonly http: Http
+  private controllerInstance: any
 
   constructor(http: Http) {
     this.http = http
@@ -34,11 +36,21 @@ export class Router {
     return this.toRoutesJSON(this.routes)
   }
 
+  controller(controller: any): this {
+    this.controllerInstance = controller
+
+    return this
+  }
+
   route(
     url: string,
     methods: HttpMethodTypes[],
     handler: HandlerContract | string,
   ): Route {
+    if (this.controllerInstance && Is.String(handler)) {
+      handler = this.controllerInstance[handler]
+    }
+
     const route = new Route(url, methods, handler)
     const openedGroup = this.getRecentGroup()
 

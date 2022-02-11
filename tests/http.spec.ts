@@ -94,4 +94,27 @@ describe('\n Http Class', () => {
     expect(response.body.error.name).toStrictEqual('BadRequestException')
     expect(response.body.error.message).toStrictEqual('Testing')
   })
+
+  it('should be able to register a new route with a intercept middleware', async () => {
+    const middlewareHttp = new Http()
+
+    await middlewareHttp.use(ctx => {
+      ctx.body.hello = ctx.body.hello.replace('world', 'world-intercepted')
+
+      ctx.next()
+    }, 'intercept')
+
+    middlewareHttp.get('/test', handler)
+
+    await middlewareHttp.listen(3030)
+
+    const response = await supertest('http://localhost:3030').get('/test')
+
+    await middlewareHttp.close()
+
+    expect(response.status).toBe(200)
+    expect(response.body).toStrictEqual({
+      hello: 'world-intercepted',
+    })
+  })
 })

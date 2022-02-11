@@ -29,7 +29,7 @@ The intention behind this repository is to always maintain a `Http` package to a
 > it keeps as dev dependency because one day `@secjs/core` will install everything once.
 
 ```bash
-npm install @secjs/ioc @secjs/utils @secjs/exceptions
+npm install @secjs/ioc @secjs/env @secjs/utils @secjs/exceptions
 ```
 
 > Then you can install the package using:
@@ -138,6 +138,66 @@ Route.group(() => {
 
 Route.register()
 http.listen()
+```
+
+### Creating a Middleware
+
+> With Http you can define three different execution times for one middleware
+
+```ts
+import { 
+  Router,
+  MiddlewareContract,
+  HandleContextContract,
+  InterceptContextContract,
+  TerminateContextContract 
+} from '@secjs/http'
+
+export class Middleware implements MiddlewareContract {
+  // Handle method will be executed before the controller method handler
+  // This is the normal middleware
+  async handle(ctx: HandleContextContract) {
+    ctx.data.userId = '1'
+
+    ctx.next()
+  }
+
+  // Intercept method will be executed before the response goes to client
+  async intercept(ctx: InterceptContextContract) {
+    // You can use intercept to rewrite or add some information to the response
+    ctx.body.intercepted = true
+    ctx.response.status(304)
+
+    ctx.next()
+  }
+
+  // Terminate method will be executed after the response goes to client
+  async terminate(ctx: TerminateContextContract) {
+    // You can use terminate to save metrics of the request in an Elastic for example
+    console.log('Terminate middleware executed!')
+
+    ctx.next()
+  }
+}
+```
+
+> Now we can use Router to set the middleware in some route
+
+```ts
+Container.singleton(
+  {
+    'middleware': new Middleware(),
+  },
+  'Middlewares',
+)
+
+// If you use named middlewares in Router, he will register all the three methods of Middleware class.
+Route.get('middlewares', 'TestController.index').middleware('middleware')
+
+// 
+Route
+  .get('middlewares', 'TestController.index')
+  .middleware(new Middleware().handle)
 ```
 
 ---

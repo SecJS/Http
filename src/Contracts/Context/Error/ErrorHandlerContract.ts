@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
-export interface NextContract {
-  (...params: any[]): void
+import { ErrorContextContract } from './ErrorContextContract'
+
+export interface ErrorHandlerContract {
+  (ctx?: ErrorContextContract): Promise<any> | any
 }

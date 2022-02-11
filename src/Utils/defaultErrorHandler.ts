@@ -8,13 +8,13 @@
  */
 
 import { String } from '@secjs/utils'
-import { ContextContract } from '../Contracts/Context/ContextContract'
+import { ErrorContextContract } from '../Contracts/Context/Error/ErrorContextContract'
 
 export function defaultErrorHandler({
   error,
   request,
   response,
-}: ContextContract) {
+}: ErrorContextContract) {
   const code = error.code || error.name
   const statusCode = error.statusCode || error.status || 500
 

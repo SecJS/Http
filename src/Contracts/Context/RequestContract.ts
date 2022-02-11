@@ -10,8 +10,9 @@
 export interface RequestContract {
   ip: string
   method: string
-  fullUrl: string
+  hostUrl: string
   baseUrl: string
+  originalUrl: string
   body: Record<string, any>
   params: Record<string, string>
   queries: Record<string, string>

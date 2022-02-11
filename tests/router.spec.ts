@@ -18,6 +18,9 @@ import { Router } from '../src/Router/Router'
 import { BadRequestException } from '@secjs/exceptions'
 import { TestController } from './stubs/TestController'
 import { TestMiddleware } from './stubs/TestMiddleware'
+import { InterceptMiddleware } from './stubs/InterceptMiddleware'
+import { TerminateMiddleware } from './stubs/TerminateMiddleware'
+import { HandleMiddleware } from './stubs/HandleMiddleware'
 
 describe('\n Route Class', () => {
   let http: Http
@@ -33,6 +36,19 @@ describe('\n Route Class', () => {
 
     ctx.response.status(200).send(data)
   }
+
+  beforeAll(async () => {
+    Container.singleton(TestController, 'TestController')
+    Container.singleton(
+      {
+        full: new TestMiddleware(),
+        handle: new HandleMiddleware(),
+        terminate: new TerminateMiddleware(),
+        intercept: new InterceptMiddleware(),
+      },
+      'Middlewares',
+    )
+  })
 
   beforeEach(async () => {
     http = new Http()
@@ -82,8 +98,6 @@ describe('\n Route Class', () => {
   })
 
   it('should be able to register a new route resource', async () => {
-    Container.singleton(TestController, 'TestController')
-
     router.resource('test', new TestController()).only(['store'])
     router.resource('tests', 'TestController').only(['index', 'show', 'store'])
 
@@ -118,16 +132,9 @@ describe('\n Route Class', () => {
   })
 
   it('should be able to register a new route with middleware', async () => {
-    Container.singleton(TestController, 'TestController')
-    Container.singleton(
-      { 'test.auth': new TestMiddleware(), 'test.hello': new TestMiddleware() },
-      'Middlewares',
-    )
-
     router
       .get('test', 'TestController.index')
-      .middleware('test.auth')
-      .middleware('test.hello')
+      .middleware('handle')
       .middleware(ctx => {
         ctx.data.midHandler = true
 
@@ -138,26 +145,17 @@ describe('\n Route Class', () => {
 
     await http.listen(3043)
 
-    {
-      const response = await supertest('http://localhost:3043').get('/test')
+    const response = await supertest('http://localhost:3043').get('/test')
 
-      expect(response.status).toBe(200)
-      expect(response.body).toStrictEqual({
-        hello: 'world',
-        param: 'param',
-        midHandler: true,
-        test: 'middleware',
-      })
-    }
+    expect(response.status).toBe(200)
+    expect(response.body).toStrictEqual({
+      hello: 'world',
+      midHandler: true,
+      middlewares: ['handle'],
+    })
   })
 
   it('should be able to register a new group with resource inside', async () => {
-    Container.singleton(TestController, 'TestController')
-    Container.singleton(
-      { 'test.auth': new TestMiddleware(), 'test.hello': new TestMiddleware() },
-      'Middlewares',
-    )
-
     router
       .group(() => {
         router.get('test', 'TestController.show').middleware(ctx => {
@@ -183,8 +181,7 @@ describe('\n Route Class', () => {
           })
       })
       .prefix('v1')
-      .middleware('test.auth')
-      .middleware('test.hello')
+      .middleware('handle')
       .middleware(ctx => {
         ctx.data.midHandler = true
 
@@ -216,23 +213,127 @@ describe('\n Route Class', () => {
       expect(response.status).toBe(200)
       expect(response.body).toStrictEqual({
         hello: 'world',
-        param: 'param',
         midHandler: true,
         patchHandler: true,
-        test: 'middleware',
+        middlewares: ['handle'],
       })
     }
     {
-      const response = await supertest('http://localhost:3044').post('/v1/tests')
+      const response = await supertest('http://localhost:3044').post(
+        '/v1/tests',
+      )
 
       expect(response.status).toBe(200)
       expect(response.body).toStrictEqual({
         hello: 'world',
-        param: 'param',
         midHandler: true,
         rscHandler: true,
-        test: 'middleware',
+        middlewares: ['handle'],
       })
     }
+  })
+
+  it('should be able to register a new route with intercept middleware', async () => {
+    router
+      .get('test', 'TestController.index')
+      .middleware('handle')
+      .middleware('intercept')
+
+    router.register()
+
+    await http.listen(3045)
+
+    const response = await supertest('http://localhost:3045').get('/test')
+
+    expect(response.status).toBe(200)
+    expect(response.body).toStrictEqual({
+      hello: 'world',
+      middlewares: ['handle', 'intercept'],
+    })
+  })
+
+  it('should be able to register a new route with terminate middleware', async () => {
+    let terminated = false
+
+    router
+      .get('test', 'TestController.index')
+      .middleware('handle')
+      .middleware(ctx => {
+        terminated = true
+
+        ctx.next()
+      }, 'terminate')
+
+    router.register()
+
+    await http.listen(3046)
+
+    const response = await supertest('http://localhost:3046').get('/test')
+
+    expect(response.status).toBe(200)
+    expect(terminated).toBe(true)
+    expect(response.body).toStrictEqual({
+      hello: 'world',
+      middlewares: ['handle'],
+    })
+  })
+
+  it('should be able to register a new route with middleware and controller direct class', async () => {
+    let terminated = false
+
+    router
+      .controller(new TestController())
+      .get('test', 'index')
+      .middleware(new HandleMiddleware())
+      .middleware(ctx => {
+        terminated = true
+
+        ctx.next()
+      }, 'terminate')
+
+    router.register()
+
+    await http.listen(3047)
+
+    const response = await supertest('http://localhost:3047').get('/test')
+
+    expect(response.status).toBe(200)
+    expect(terminated).toBe(true)
+    expect(response.body).toStrictEqual({
+      hello: 'world',
+      middlewares: ['handle'],
+    })
+  })
+
+  it('should be able to register a new route with middleware direct class on groups', async () => {
+    let terminated = false
+
+    router
+      .controller(new TestController())
+      .group(() => {
+        router.get('test', 'index')
+      })
+      .prefix('api/v1')
+      .middleware(new HandleMiddleware())
+      .middleware(ctx => {
+        terminated = true
+
+        ctx.next()
+      }, 'terminate')
+
+    router.register()
+
+    await http.listen(3048)
+
+    const response = await supertest('http://localhost:3048').get(
+      '/api/v1/test',
+    )
+
+    expect(response.status).toBe(200)
+    expect(terminated).toBe(true)
+    expect(response.body).toStrictEqual({
+      hello: 'world',
+      middlewares: ['handle'],
+    })
   })
 })

@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
-export interface NextContract {
-  (...params: any[]): void
+import { HandleContextContract } from './HandleContextContract'
+
+export interface HandleHandlerContract {
+  (ctx?: HandleContextContract): Promise<any> | any
 }

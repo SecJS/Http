@@ -9,10 +9,17 @@
 
 import '@secjs/ioc/src/utils/global'
 
+import { Is } from '@secjs/utils'
 import { removeSlash } from '../Utils/removeSlash'
+import { InternalServerException } from '@secjs/exceptions'
+import { MiddlewareTypes } from '../Contracts/MiddlewareTypes'
 import { HttpMethodTypes } from '../Contracts/HttpMethodTypes'
 import { HandlerContract } from '../Contracts/Context/HandlerContract'
-import { Is } from '@secjs/utils'
+import { MiddlewareTypesContract } from '../Contracts/MiddlewareTypesContract'
+import { InterceptHandlerContract } from '../Contracts/Context/Middlewares/Intercept/InterceptHandlerContract'
+import { TerminateHandlerContract } from '../Contracts/Context/Middlewares/Terminate/TerminateHandlerContract'
+import { MiddlewareContract } from '../Contracts/MiddlewareContract'
+import { isMiddlewareContract } from '../Utils/isMiddlewareContract'
 
 export class Route {
   private readonly url: string
@@ -22,7 +29,7 @@ export class Route {
   name: string
   deleted: boolean
 
-  private routeMiddlewares: HandlerContract[]
+  private routeMiddlewares: MiddlewareTypesContract
   private routeNamespace: string
 
   private prefixes: string[]
@@ -37,7 +44,7 @@ export class Route {
     this.methods = methods
     this.prefixes = []
     this.deleted = false
-    this.routeMiddlewares = []
+    this.routeMiddlewares = { handlers: [], terminators: [], interceptors: [] }
 
     if (typeof handler === 'string') {
       const [controller, method] = handler.split('.')
@@ -80,23 +87,54 @@ export class Route {
     return this
   }
 
-  middleware(middleware: HandlerContract | string, prepend = false): this {
-    const setMiddleware = (mid: HandlerContract) => {
-      if (prepend) {
-        this.routeMiddlewares.unshift(mid)
-      } else {
-        this.routeMiddlewares.push(mid)
-      }
+  middleware(
+    middleware:
+      | HandlerContract
+      | MiddlewareContract
+      | InterceptHandlerContract
+      | TerminateHandlerContract
+      | string,
+    type: MiddlewareTypes = 'handle',
+    prepend = false,
+  ): this {
+    const dictionary = {
+      handle: 'handlers',
+      terminate: 'terminators',
+      intercept: 'interceptors',
     }
 
+    const insertionType = prepend ? 'unshift' : 'push'
+
     if (Is.String(middleware)) {
-      const middlewares = Container.get('Middlewares') as Record<string, any>
-      setMiddleware(middlewares[middleware]['handle'])
+      const mid = Container.get('Middlewares')[middleware]
+
+      if (!mid) {
+        throw new InternalServerException(
+          `Middleware ${middleware} not found in IoC container`,
+        )
+      }
+
+      if (mid.handle) this.routeMiddlewares.handlers[insertionType](mid.handle)
+      if (mid.intercept)
+        this.routeMiddlewares.interceptors[insertionType](mid.intercept)
+      if (mid.terminate)
+        this.routeMiddlewares.terminators[insertionType](mid.terminate)
 
       return this
     }
 
-    setMiddleware(middleware)
+    if (isMiddlewareContract(middleware)) {
+      if (middleware.handle)
+        this.routeMiddlewares.handlers[insertionType](middleware.handle)
+      if (middleware.intercept)
+        this.routeMiddlewares.interceptors[insertionType](middleware.intercept)
+      if (middleware.terminate)
+        this.routeMiddlewares.terminators[insertionType](middleware.terminate)
+
+      return this
+    }
+
+    this.routeMiddlewares[dictionary[type]][insertionType](middleware)
 
     return this
   }
