@@ -168,7 +168,14 @@ export class Middleware implements MiddlewareContract {
     ctx.body.intercepted = true
     ctx.response.status(304)
 
-    ctx.next()
+    // Example
+    if ('intercept method logic changes the body') {
+      // In intercept method, next function needs to receive the new body payload as parameter.
+      ctx.next({ hello: 'intercepted', ...ctx.body })
+    } else {
+      // If your logic does not change the body you can just do like this
+      ctx.next(ctx.body)
+    }
   }
 
   // Terminate method will be executed after the response goes to client

@@ -7,9 +7,9 @@
  * file that was distributed with this source code.
  */
 
-import { NextContract } from '../../NextContract'
 import { RequestContract } from '../../RequestContract'
 import { ResponseContract } from '../../ResponseContract'
+import { NextInterceptContract } from './NextInterceptContract'
 
 export interface InterceptContextContract {
   request: RequestContract
@@ -18,5 +18,5 @@ export interface InterceptContextContract {
   queries: Record<string, string>
   body: Record<string, any>
   data?: Record<string, any>
-  next: NextContract
+  next: NextInterceptContract
 }
