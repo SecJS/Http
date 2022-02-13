@@ -16,6 +16,7 @@ import { HandlerContract } from '../Contracts/Context/HandlerContract'
 import { ErrorHandlerContract } from '../Contracts/Context/Error/ErrorHandlerContract'
 import { HandleHandlerContract } from '../Contracts/Context/Middlewares/Handle/HandleHandlerContract'
 import { InterceptHandlerContract } from '../Contracts/Context/Middlewares/Intercept/InterceptHandlerContract'
+import { Is } from '@secjs/utils'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -33,7 +34,11 @@ export class FastifyHandler {
       if (!req.query) req.query = {}
       if (!req.params) req.params = {}
 
-      const body = JSON.parse(payload)
+      let body = payload
+
+      if (Is.Json(payload)) {
+        body = JSON.parse(body)
+      }
 
       return handler({
         request,
@@ -42,7 +47,14 @@ export class FastifyHandler {
         params: req.params as Record<string, string>,
         queries: req.query as Record<string, string>,
         data: req.data,
-        next: () => done(null, JSON.stringify(body)),
+        next: (
+          body: string | Buffer | Record<string, any> | null,
+          error = null,
+        ) => {
+          if (Is.Object(body)) body = JSON.stringify(body)
+
+          done(error, body)
+        },
       })
     }
   }

@@ -24,7 +24,7 @@ export class TestMiddleware implements MiddlewareContract {
     ctx.data.param = 'param'
     ctx.request.queries.test = 'middleware'
 
-    ctx.next()
+    ctx.next(ctx.body)
   }
 
   async terminate(ctx: TerminateContextContract) {
