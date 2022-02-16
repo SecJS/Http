@@ -65,11 +65,8 @@ export class Http {
     this.server.addHook(hookName, FastifyHandler[handlerType](handler))
   }
 
-  listen(
-    port?: number,
-    cb?: (err: Error | null, address: string) => void,
-  ): void | string {
-    return this.server.listen(port || 1335, cb)
+  async listen(port?: string | number, host?: string): Promise<string> {
+    return this.server.listen(port || 1335, host || '127.0.0.1')
   }
 
   close(cb?: () => void): void {

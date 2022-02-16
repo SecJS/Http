@@ -58,7 +58,7 @@ server.get('/', ({ response }) => {
     .send({ hello: 'world!', param: ctx.data.param })
 })
 
-server.listen(1335, () => console.log('Server running!'))
+server.listen().then(address => `Server running on address ${address}`)
 ```
 
 ---
